@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MyHotel — Owner Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#0e0c0a; --surface:#1a1713; --card:#211e1a;
+      --gold:#c9a84c; --gold-light:#e8cc80; --cream:#f5efe6;
+      --muted:#7a7060; --border:#2e2a24; --green:#4caf7d;
+      --orange:#e8954a; --red:#e05a5a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    body { background:var(--bg); color:var(--cream); font-family:'DM Sans',sans-serif; min-height:100vh; }
+
+    /* HEADER */
+    .header { background:var(--surface); border-bottom:1px solid var(--border); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; }
+    .header-left h1 { font-family:'Playfair Display',serif; font-size:22px; color:var(--cream); }
+    .header-left p { font-size:12px; color:var(--muted); margin-top:2px; }
+    .live-badge { display:flex; align-items:center; gap:6px; background:rgba(76,175,125,0.1); border:1px solid rgba(76,175,125,0.25); border-radius:100px; padding:6px 12px; font-size:12px; color:var(--green); }
+    .live-dot { width:6px; height:6px; background:var(--green); border-radius:50%; animation:livePulse 1.5s infinite; }
+    @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* STATS */
+    .stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; padding:16px; }
+    .stat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; text-align:center; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:24px; color:var(--gold); }
+    .stat-label { font-size:11px; color:var(--muted); margin-top:2px; }
+
+    /* TABS */
+    .order-tabs { display:flex; border-bottom:1px solid var(--border); padding:0 16px; gap:0; }
+    .order-tab { padding:12px 16px; font-size:13px; font-weight:500; cursor:pointer; border-bottom:2px solid transparent; color:var(--muted); transition:all 0.2s; font-family:'DM Sans',sans-serif; background:transparent; border-top:none; border-left:none; border-right:none; }
+    .order-tab.active { color:var(--gold); border-bottom-color:var(--gold); }
+    .tab-count { background:rgba(201,168,76,0.15); color:var(--gold); border-radius:100px; padding:1px 7px; font-size:10px; margin-left:5px; }
+
+    /* ORDER CARDS */
+    .orders-list { padding:12px 16px; }
+    .order-card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:12px; transition:border-color 0.2s; }
+    .order-card.new { border-color:var(--gold); animation:newOrder 0.5s ease; }
+    @keyframes newOrder { 0%{transform:scale(0.97);opacity:0} 100%{transform:scale(1);opacity:1} }
+    .order-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+    .order-id { font-size:11px; color:var(--muted); letter-spacing:1px; }
+    .order-time { font-size:11px; color:var(--muted); }
+    .order-customer { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+    .customer-avatar { width:36px; height:36px; background:rgba(201,168,76,0.15); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+    .customer-name { font-weight:600; font-size:15px; color:var(--cream); }
+    .customer-table { font-size:12px; color:var(--muted); }
+    .order-items-list { background:var(--surface); border-radius:10px; padding:10px 12px; margin-bottom:12px; }
+    .order-item-line { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; }
+    .order-item-line:not(:last-child) { border-bottom:1px solid var(--border); padding-bottom:7px; margin-bottom:4px; }
+    .total-line { display:flex; justify-content:space-between; font-weight:600; font-size:14px; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+    .total-amount { color:var(--gold); }
+
+    /* STATUS BADGE */
+    .status-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:100px; font-size:11px; font-weight:600; }
+    .pay-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:100px; font-size:11px; font-weight:700; margin-left:6px; }
+    .pay-badge.upi { background:rgba(74,158,237,0.15); color:#4a9eed; border:1px solid rgba(74,158,237,0.3); }
+    .pay-badge.cash { background:rgba(232,149,74,0.15); color:var(--orange); border:1px solid rgba(232,149,74,0.3); }
+    .status-badge.pending { background:rgba(232,149,74,0.15); color:var(--orange); border:1px solid rgba(232,149,74,0.3); }
+    .status-badge.preparing { background:rgba(201,168,76,0.15); color:var(--gold); border:1px solid rgba(201,168,76,0.3); }
+    .status-badge.ready { background:rgba(76,175,125,0.15); color:var(--green); border:1px solid rgba(76,175,125,0.3); }
+
+    /* ACTION BUTTONS */
+    .action-row { display:flex; gap:8px; }
+    .btn { flex:1; padding:11px; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; border:none; transition:transform 0.1s, opacity 0.2s; }
+    .btn:active { transform:scale(0.97); }
+    .btn-accept { background:var(--green); color:white; }
+    .btn-ready { background:var(--gold); color:#0e0c0a; }
+    .btn-reject { background:transparent; border:1px solid var(--border); color:var(--muted); flex:0.4; }
+
+    /* ETA SELECTOR */
+    .eta-selector { display:none; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+    .eta-selector.show { display:flex; }
+    .eta-chip { padding:7px 14px; border-radius:100px; font-size:12px; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-family:'DM Sans',sans-serif; background:transparent; transition:all 0.15s; }
+    .eta-chip:hover, .eta-chip.selected { background:var(--gold); color:#0e0c0a; border-color:var(--gold); font-weight:600; }
+    .eta-label-text { font-size:12px; color:var(--muted); margin-bottom:6px; display:none; }
+    .eta-label-text.show { display:block; }
+
+    /* EMPTY STATE */
+    .empty { text-align:center; padding:60px 20px; color:var(--muted); }
+    .empty-icon { font-size:40px; margin-bottom:12px; }
+    .empty-text { font-size:14px; }
+
+    /* NOTIFY BANNER */
+    .notify-banner { position:fixed; top:0; left:0; right:0; background:var(--gold); color:#0e0c0a; text-align:center; padding:14px; font-weight:600; font-size:15px; z-index:999; transform:translateY(-100%); transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    .notify-banner.show { transform:translateY(0); }
+
+    /* LOGIN */
+    .login-screen { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:32px 24px; text-align:center; }
+    .login-logo { font-family:'Playfair Display',serif; font-size:40px; color:var(--cream); margin-bottom:6px; }
+    .login-sub { font-size:13px; color:var(--muted); margin-bottom:32px; }
+    .login-input { width:100%; max-width:320px; background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px; color:var(--cream); font-size:16px; font-family:'DM Sans',sans-serif; outline:none; text-align:center; letter-spacing:2px; margin-bottom:12px; }
+    .login-input:focus { border-color:var(--gold); }
+    .login-btn { width:100%; max-width:320px; background:var(--gold); color:#0e0c0a; border:none; padding:15px; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; }
+    .login-note { font-size:12px; color:var(--muted); margin-top:12px; }
+  </style>
+</head>
+<body>
+
+<div class="notify-banner" id="notifyBanner">🔔 New Order Received!</div>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-logo">My<em style="color:var(--gold)">Hotel</em></div>
+  <div class="login-sub">Owner Dashboard</div>
+  <input class="login-input" type="password" id="loginPin" placeholder="Enter PIN" maxlength="4"/>
+  <button class="login-btn" onclick="doLogin()">Enter Dashboard</button>
+  <p class="login-note">Default PIN: 1234 — Change in settings</p>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none">
+  <div class="header">
+    <div class="header-left">
+      <h1>My<em style="color:var(--gold)">Hotel</em></h1>
+      <p id="dateDisplay"></p>
+    </div>
+    <div class="live-badge"><div class="live-dot"></div> Live</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-num" id="statNew">0</div>
+      <div class="stat-label">New Orders</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statToday">0</div>
+      <div class="stat-label">Today Total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statRev">₹0</div>
+      <div class="stat-label">Revenue</div>
+    </div>
+  </div>
+
+  <div class="order-tabs">
+    <button class="order-tab active" onclick="filterOrders('pending',this)">New <span class="tab-count" id="pendingCount">0</span></button>
+    <button class="order-tab" onclick="filterOrders('preparing',this)">Preparing <span class="tab-count" id="preparingCount">0</span></button>
+    <button class="order-tab" onclick="filterOrders('ready',this)">Ready <span class="tab-count" id="readyCount">0</span></button>
+    <button class="order-tab" onclick="filterOrders('all',this)">All</button>
+  </div>
+
+  <div class="orders-list" id="ordersList"></div>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────
+const DASHBOARD_PIN = '1234';       // Change this PIN
+const SHEET_URL     = 'https://script.google.com/macros/s/AKfycbwvdzxHosTC3RfiwHlElvTaO3R-XX1oyrxHYrNzRCtlBLAVQfiWG58PyirkICRa3wCoxg/exec';
+// ─────────────────────────────────────────────────────────────
+
+let orders = [];
+let currentFilter = 'pending';
+let lastOrderCount = 0;
+let selectedETA = {};
+
+// ─── LOGIN ─────────────────────────────────────────────────────
+function doLogin() {
+  try {
+    const pin = document.getElementById('loginPin').value;
+    console.log('PIN entered:', pin, 'Expected:', DASHBOARD_PIN);
+    if (pin === DASHBOARD_PIN) {
+      console.log('PIN correct, logging in...');
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      initDashboard();
+    } else {
+      console.log('PIN incorrect');
+      document.getElementById('loginPin').style.borderColor = 'var(--red)';
+      document.getElementById('loginPin').value = '';
+      document.getElementById('loginPin').placeholder = 'Wrong PIN - try 1234';
+    }
+  } catch(e) {
+    console.error('Login error:', e);
+    alert('Login error: ' + e.message);
+  }
+}
+document.getElementById('loginPin').addEventListener('keypress', e => {
+  if (e.key === 'Enter') doLogin();
+});
+
+// ─── INIT ──────────────────────────────────────────────────────
+function initDashboard() {
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short'});
+
+  // Load demo orders if no sheet connected
+  if (SHEET_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    loadDemoOrders();
+  } else {
+    fetchOrders();
+    setInterval(fetchOrders, 3000); // poll every 3 seconds — faster updates
+  }
+}
+
+// ─── DEMO ORDERS (for testing without sheet) ──────────────────
+function loadDemoOrders() {
+  orders = [
+    { orderId:'PRD001', name:'Rahul Sharma', phone:'9812345678', table:'3', items:'• Chai x2 = ₹100\n• Samosa x1 = ₹90', total:'190', time:'1:32 PM', status:'pending' },
+    { orderId:'PRD002', name:'Priya Singh', phone:'9876543210', table:'7', items:'• Pizza x1 = ₹190\n• Adrak Chai x1 = ₹80', total:'270', time:'1:45 PM', status:'preparing', eta:'15 mins' },
+    { orderId:'PRD003', name:'Amit Kumar', phone:'9988776655', table:'2', items:'• Pasta x2 = ₹300', total:'300', time:'2:01 PM', status:'ready' },
+  ];
+  renderOrders();
+  updateStats();
+}
+
+function fetchOrders() {
+  console.log('Fetching orders from:', SHEET_URL);
+  fetch(`${SHEET_URL}?action=getorders`)
+    .then(r => {
+      console.log('Response received:', r.status);
+      return r.json();
+    })
+    .then(data => {
+      if (data.orders) {
+        if (data.orders.length > lastOrderCount && lastOrderCount > 0) showNotification();
+        lastOrderCount = data.orders.length;
+        orders = data.orders;
+        renderOrders();
+        updateStats();
+      }
+    }).catch(() => {});
+}
+
+// ─── RENDER ────────────────────────────────────────────────────
+function filterOrders(status, el) {
+  currentFilter = status;
+  document.querySelectorAll('.order-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderOrders();
+}
+
+function renderOrders() {
+  const filtered = currentFilter === 'all' ? orders : orders.filter(o => o.status === currentFilter);
+  const list = document.getElementById('ordersList');
+
+  document.getElementById('pendingCount').textContent = orders.filter(o=>o.status==='pending').length;
+  document.getElementById('preparingCount').textContent = orders.filter(o=>o.status==='preparing').length;
+  document.getElementById('readyCount').textContent = orders.filter(o=>o.status==='ready').length;
+
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🍽️</div><div class="empty-text">No ${currentFilter === 'all' ? '' : currentFilter} orders</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(order => {
+    const itemLines = order.items.split('\n').filter(Boolean).map(line => {
+      const parts = line.replace('• ','').split(' = ');
+      return `<div class="order-item-line"><span style="color:var(--cream)">${parts[0]||line}</span><span style="color:var(--muted)">${parts[1]||''}</span></div>`;
+    }).join('');
+
+    const statusBadge = {
+      pending: `<span class="status-badge pending">⏳ New Order</span>`,
+      preparing: `<span class="status-badge preparing">👨‍🍳 Preparing${order.eta ? ' · '+order.eta : ''}</span>`,
+      ready: `<span class="status-badge ready">✓ Ready</span>`,
+    }[order.status] || '';
+
+    const actions = {
+      pending: `
+        <div class="eta-label-text show" id="etalabel-${order.orderId}">Select estimated time:</div>
+        <div class="eta-selector show" id="eta-${order.orderId}">
+          ${['10 mins','15 mins','20 mins','25 mins','30 mins'].map(t =>
+            `<button class="eta-chip" onclick="selectETA('${order.orderId}','${t}')">${t}</button>`
+          ).join('')}
+        </div>
+        <div class="action-row">
+          <button class="btn btn-accept" onclick="acceptOrder('${order.orderId}')">✓ Accept Order</button>
+          <button class="btn btn-reject" onclick="rejectOrder('${order.orderId}')">✗</button>
+        </div>`,
+      preparing: `
+        <div class="action-row">
+          <button class="btn btn-ready" onclick="markReady('${order.orderId}')">🍽️ Mark as Ready</button>
+        </div>`,
+      ready: `<div style="text-align:center;font-size:13px;color:var(--green);padding:6px 0">✓ Completed</div>`,
+    }[order.status] || '';
+
+    return `<div class="order-card ${order.status === 'pending' ? 'new' : ''}" id="oc-${order.orderId}">
+      <div class="order-header">
+        <div>
+          <div class="order-id">#${order.orderId}
+            ${order.payment === 'upi' 
+              ? '<span class="pay-badge upi">✅ UPI Paid</span>' 
+              : '<span class="pay-badge cash">💵 Cash / Later</span>'}
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="order-time">${order.time}</div>
+      </div>
+      <div class="order-customer">
+        <div class="customer-avatar">👤</div>
+        <div>
+          <div class="customer-name">${order.name}</div>
+          <div class="customer-table">Table ${order.table} · ${order.phone}</div>
+        </div>
+      </div>
+      <div class="order-items-list">
+        ${itemLines}
+        <div class="total-line"><span>Total</span><span class="total-amount">₹${order.total}</span></div>
+      </div>
+      ${actions}
+    </div>`;
+  }).join('');
+}
+
+function selectETA(orderId, time) {
+  selectedETA[orderId] = time;
+  document.querySelectorAll(`#eta-${orderId} .eta-chip`).forEach(c => {
+    c.classList.toggle('selected', c.textContent === time);
+  });
+}
+
+// ─── ORDER ACTIONS ─────────────────────────────────────────────
+function acceptOrder(orderId) {
+  const eta = selectedETA[orderId];
+  if (!eta) { alert('Please select an estimated time first'); return; }
+  
+  // Immediate UI update — don't wait for next poll
+  const order = orders.find(o => o.orderId === orderId);
+  if (order) {
+    order.status = 'preparing';
+    order.eta = eta;
+    renderOrders(); // Re-render immediately
+  }
+  
+  updateOrderStatus(orderId, 'preparing', eta);
+  if (order) {
+    // Opens WhatsApp with customer's number — owner just presses Send
+    const itemsList = order.items.trim().split('\n').filter(Boolean).join('\n');
+    const msg = `✅ *Order Confirmed!*\n\n`
+      + `Hi ${order.name}! 👋 Your order at *MyHotel* is confirmed.\n\n`
+      + `*Your Items:*\n${itemsList}\n\n`
+      + `⏱️ *Ready in: ${eta}*\n`
+      + `🪑 *Table:* ${order.table}\n\n`
+      + `Sit back and relax — we will notify you when ready! 🙏`;
+    window.open(`https://wa.me/91${order.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+}
+
+function markReady(orderId) {
+  // Immediate UI update — don't wait for next poll
+  const order = orders.find(o => o.orderId === orderId);
+  if (order) {
+    order.status = 'ready';
+    renderOrders(); // Re-render immediately
+  }
+  
+  updateOrderStatus(orderId, 'ready', null);
+  if (order) {
+    // Opens WhatsApp with customer's number — owner just presses Send
+    const msg = `🍽️ *Order Ready — MyHotel*\n\n`
+      + `Hi ${order.name}! Your order is ready and being served to your table shortly.\n\n`
+      + `🪑 Table: ${order.table}\n`
+      + `🆔 Order: #${orderId}\n\n`
+      + `Enjoy your meal! Thank you for dining with us 😊🙏`;
+    window.open(`https://wa.me/91${order.phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+}
+
+function rejectOrder(orderId) {
+  if (confirm('Reject this order?')) {
+    updateOrderStatus(orderId, 'rejected', null);
+  }
+}
+
+function updateOrderStatus(orderId, status, eta) {
+  const idx = orders.findIndex(o => o.orderId === orderId);
+  if (idx !== -1) {
+    orders[idx].status = status;
+    if (eta) orders[idx].eta = eta;
+  }
+  renderOrders();
+  updateStats();
+
+  if (SHEET_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    fetch(SHEET_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'updatestatus', orderId, status, eta })
+    });
+  }
+}
+
+function updateStats() {
+  const pending = orders.filter(o=>o.status==='pending').length;
+  const today = orders.length;
+  const rev = orders.reduce((sum,o) => sum + parseInt(o.total||0), 0);
+  document.getElementById('statNew').textContent = pending;
+  document.getElementById('statToday').textContent = today;
+  document.getElementById('statRev').textContent = `₹${rev}`;
+}
+
+function showNotification() {
+  const banner = document.getElementById('notifyBanner');
+  banner.classList.add('show');
+  setTimeout(() => banner.classList.remove('show'), 3000);
+  try { new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAA==').play(); } catch(e){}
+}
+</script>
+</body>
+</html>

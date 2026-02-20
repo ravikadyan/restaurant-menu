@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MyHotel - Analytics Dashboard (Demo)</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    :root {
+      --bg: #0a0805;
+      --surface: #1a1612;
+      --card: #2a2520;
+      --gold: #d4a843;
+      --cream: #f7f0e6;
+      --muted: #a89e91;
+      --border: rgba(247,240,230,0.12);
+      --green: #5aaf7a;
+      --red: #e85d5d;
+      --orange: #e8844a;
+    }
+    
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--cream);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    .header {
+      text-align: center;
+      padding: 30px 0 40px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 30px;
+    }
+    
+    .logo {
+      font-family: Georgia, serif;
+      font-size: 42px;
+      font-style: italic;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+    
+    .logo em { color: var(--gold); }
+    
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--gold);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    
+    .stat-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--gold);
+      font-family: Georgia, serif;
+    }
+    
+    .stat-change {
+      font-size: 13px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+    
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .item-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .item-row:last-child { border-bottom: none; }
+    
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .item-rank {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--gold);
+    }
+    
+    .item-name {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--cream);
+    }
+    
+    .item-stats {
+      text-align: right;
+    }
+    
+    .item-orders {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gold);
+    }
+    
+    .item-revenue {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    .chart-bar {
+      height: 200px;
+      display: flex;
+      align-items: flex-end;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .bar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .bar {
+      width: 100%;
+      background: linear-gradient(180deg, var(--gold) 0%, var(--orange) 100%);
+      border-radius: 8px 8px 0 0;
+      transition: all 0.3s;
+      position: relative;
+    }
+    
+    .bar:hover { filter: brightness(1.2); }
+    
+    .bar-value {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+    }
+    
+    .bar-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .customer-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .customer-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .customer-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--orange) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--bg);
+    }
+    
+    .customer-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--cream);
+    }
+    
+    .customer-phone {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    
+    .customer-stats {
+      text-align: right;
+    }
+    
+    .customer-orders {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    
+    .customer-spent {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .badge-vip {
+      background: rgba(212,168,67,0.2);
+      color: var(--gold);
+    }
+  </style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    
+    <div class="header">
+      <div class="logo">My<em>Hotel</em></div>
+      <div class="subtitle">Analytics Dashboard</div>
+    </div>
+    
+    <!-- KEY METRICS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Today's Orders</div>
+        <div class="stat-value">47</div>
+        <div class="stat-change up">↑ 12% vs yesterday</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Today's Revenue</div>
+        <div class="stat-value">₹18,450</div>
+        <div class="stat-change up">↑ 8% vs yesterday</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Avg Order Value</div>
+        <div class="stat-value">₹392</div>
+        <div class="stat-change down">↓ 3% vs last week</div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-label">Peak Hour</div>
+        <div class="stat-value">1-2 PM</div>
+        <div class="stat-change" style="color:var(--muted)">12 orders</div>
+      </div>
+    </div>
+    
+    <!-- HOURLY ORDERS CHART -->
+    <div class="section">
+      <div class="section-title">📊 Orders by Hour (Today)</div>
+      <div class="chart-bar">
+        <div class="bar-item">
+          <div class="bar" style="height:30%">
+            <div class="bar-value">3</div>
+          </div>
+          <div class="bar-label">9 AM</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:45%">
+            <div class="bar-value">5</div>
+          </div>
+          <div class="bar-label">10 AM</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:65%">
+            <div class="bar-value">8</div>
+          </div>
+          <div class="bar-label">11 AM</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:85%">
+            <div class="bar-value">11</div>
+          </div>
+          <div class="bar-label">12 PM</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:100%">
+            <div class="bar-value">12</div>
+          </div>
+          <div class="bar-label">1 PM</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:75%">
+            <div class="bar-value">9</div>
+          </div>
+          <div class="bar-label">2 PM</div>
+        </div>
+        <div class="bar-item">
+          <div class="bar" style="height:40%">
+            <div class="bar-value">4</div>
+          </div>
+          <div class="bar-label">3 PM</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- BEST SELLERS -->
+    <div class="section">
+      <div class="section-title">🏆 Best Selling Items (This Week)</div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-rank" style="background:var(--gold);color:var(--bg)">1</div>
+          <div class="item-name">Butter Chicken</div>
+        </div>
+        <div class="item-stats">
+          <div class="item-orders">23 orders</div>
+          <div class="item-revenue">₹6,900 revenue</div>
+        </div>
+      </div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-rank">2</div>
+          <div class="item-name">Garlic Naan</div>
+        </div>
+        <div class="item-stats">
+          <div class="item-orders">41 orders</div>
+          <div class="item-revenue">₹2,460 revenue</div>
+        </div>
+      </div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-rank">3</div>
+          <div class="item-name">Masala Chai</div>
+        </div>
+        <div class="item-stats">
+          <div class="item-orders">38 orders</div>
+          <div class="item-revenue">₹1,520 revenue</div>
+        </div>
+      </div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-rank">4</div>
+          <div class="item-name">Dal Makhani</div>
+        </div>
+        <div class="item-stats">
+          <div class="item-orders">19 orders</div>
+          <div class="item-revenue">₹3,420 revenue</div>
+        </div>
+      </div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-rank">5</div>
+          <div class="item-name">Chicken Biryani</div>
+        </div>
+        <div class="item-stats">
+          <div class="item-orders">17 orders</div>
+          <div class="item-revenue">₹4,760 revenue</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- SLOW MOVERS -->
+    <div class="section">
+      <div class="section-title">⚠️ Slow Moving Items (Consider Promotion)</div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-name">Rabdi</div>
+          <span class="badge" style="background:rgba(232,93,93,0.2);color:var(--red);margin-left:10px">Only 2 orders</span>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue" style="color:var(--red)">₹180 revenue</div>
+        </div>
+      </div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-name">Missi Roti</div>
+          <span class="badge" style="background:rgba(232,93,93,0.2);color:var(--red);margin-left:10px">Only 3 orders</span>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue" style="color:var(--red)">₹135 revenue</div>
+        </div>
+      </div>
+      
+      <div class="item-row">
+        <div class="item-info">
+          <div class="item-name">Gajar Ka Halwa</div>
+          <span class="badge" style="background:rgba(232,132,74,0.2);color:var(--orange);margin-left:10px">4 orders</span>
+        </div>
+        <div class="item-stats">
+          <div class="item-revenue" style="color:var(--orange)">₹400 revenue</div>
+        </div>
+      </div>
+      
+      <div style="margin-top:20px;padding:15px;background:rgba(212,168,67,0.1);border-radius:12px;border:1px solid rgba(212,168,67,0.2)">
+        <div style="font-size:13px;color:var(--gold);font-weight:600;margin-bottom:5px">💡 Suggestion</div>
+        <div style="font-size:13px;color:var(--cream);line-height:1.6">
+          Create a discount banner: "Try our Rabdi dessert - 30% off today!" to boost sales of slow-moving items.
+        </div>
+      </div>
+    </div>
+    
+    <!-- CUSTOMER SUMMARY -->
+    <div class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <div class="section-title" style="margin-bottom:0">👥 Customer Analytics (This Month)</div>
+        <button onclick="exportAllCustomers()" style="padding:12px 24px;background:linear-gradient(135deg,var(--gold),var(--orange));color:var(--bg);border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 4px 12px rgba(212,168,67,0.3);transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px) scale(1.02)'" onmouseout="this.style.transform='translateY(0) scale(1)'">
+          📊 Export All Customers
+        </button>
+      </div>
+      
+      <div class="stats-grid" style="margin-bottom:30px">
+        <div class="stat-card" style="background:var(--card)">
+          <div class="stat-label">Total Customers</div>
+          <div class="stat-value" style="font-size:32px">142</div>
+          <div class="stat-change up">↑ 18 new this week</div>
+        </div>
+        
+        <div class="stat-card" style="background:var(--card)">
+          <div class="stat-label">Repeat Customers</div>
+          <div class="stat-value" style="font-size:32px">38</div>
+          <div class="stat-change" style="color:var(--muted)">27% of total</div>
+        </div>
+        
+        <div class="stat-card" style="background:var(--card)">
+          <div class="stat-label">VIP Customers</div>
+          <div class="stat-value" style="font-size:32px">12</div>
+          <div class="stat-change" style="color:var(--gold)">5+ orders each</div>
+        </div>
+        
+        <div class="stat-card" style="background:var(--card)">
+          <div class="stat-label">Avg Lifetime Value</div>
+          <div class="stat-value" style="font-size:32px">₹890</div>
+          <div class="stat-change up">↑ ₹120 vs last month</div>
+        </div>
+      </div>
+      
+      <!-- VIP CUSTOMERS -->
+      <div style="margin-bottom:25px">
+        <div style="font-size:18px;font-weight:600;color:var(--gold);margin-bottom:15px;display:flex;align-items:center;gap:8px">
+          ⭐ VIP Customers (5+ orders)
+        </div>
+        <button onclick="exportToExcel('vip')" style="padding:10px 20px;background:var(--gold);color:var(--bg);border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          📥 Export VIP List (12 customers)
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar">RS</div>
+            <div>
+              <div class="customer-name">Rahul Sharma <span class="badge badge-vip">VIP</span></div>
+              <div class="customer-phone">+91 98123 45678</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">12 orders this month</div>
+            <div class="customer-spent">₹4,680</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar">PS</div>
+            <div>
+              <div class="customer-name">Priya Singh <span class="badge badge-vip">VIP</span></div>
+              <div class="customer-phone">+91 98765 43210</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">9 orders this month</div>
+            <div class="customer-spent">₹3,420</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar">AK</div>
+            <div>
+              <div class="customer-name">Amit Kumar <span class="badge badge-vip">VIP</span></div>
+              <div class="customer-phone">+91 99887 76655</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">7 orders this month</div>
+            <div class="customer-spent">₹2,890</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar">NK</div>
+            <div>
+              <div class="customer-name">Neha Kapoor <span class="badge badge-vip">VIP</span></div>
+              <div class="customer-phone">+91 99123 88776</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">6 orders this month</div>
+            <div class="customer-spent">₹2,340</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar">VG</div>
+            <div>
+              <div class="customer-name">Vikas Gupta <span class="badge badge-vip">VIP</span></div>
+              <div class="customer-phone">+91 98887 65544</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">5 orders this month</div>
+            <div class="customer-spent">₹1,950</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- REGULAR CUSTOMERS -->
+      <div style="margin-bottom:25px">
+        <div style="font-size:18px;font-weight:600;color:var(--cream);margin-bottom:15px;display:flex;align-items:center;gap:8px">
+          🔄 Regular Customers (2-4 orders)
+        </div>
+        <button onclick="exportToExcel('regular')" style="padding:10px 20px;background:var(--orange);color:var(--bg);border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;transition:all 0.2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          📥 Export Regular List (26 customers)
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar" style="background:rgba(232,132,74,0.3)">SK</div>
+            <div>
+              <div class="customer-name">Sanjay Kumar</div>
+              <div class="customer-phone">+91 97654 33221</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">4 orders this month</div>
+            <div class="customer-spent">₹1,560</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar" style="background:rgba(232,132,74,0.3)">RV</div>
+            <div>
+              <div class="customer-name">Ritu Verma</div>
+              <div class="customer-phone">+91 98776 54433</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">3 orders this month</div>
+            <div class="customer-spent">₹1,170</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar" style="background:rgba(232,132,74,0.3)">MS</div>
+            <div>
+              <div class="customer-name">Mohit Sharma</div>
+              <div class="customer-phone">+91 99665 44332</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">3 orders this month</div>
+            <div class="customer-spent">₹1,080</div>
+          </div>
+        </div>
+        
+        <div class="customer-card">
+          <div class="customer-info">
+            <div class="customer-avatar" style="background:rgba(232,132,74,0.3)">DJ</div>
+            <div>
+              <div class="customer-name">Deepak Jain</div>
+              <div class="customer-phone">+91 98554 33221</div>
+            </div>
+          </div>
+          <div class="customer-stats">
+            <div class="customer-orders">2 orders this month</div>
+            <div class="customer-spent">₹780</div>
+          </div>
+        </div>
+        
+        <div style="text-align:center;padding:15px;color:var(--muted);font-size:13px;border:1px dashed var(--border);border-radius:12px;margin-top:15px">
+          + 26 more regular customers
+        </div>
+      </div>
+      
+      <!-- ONE-TIME CUSTOMERS -->
+      <div>
+        <div style="font-size:18px;font-weight:600;color:var(--muted);margin-bottom:15px;display:flex;align-items:center;justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:8px">
+            👤 One-Time Customers (104 total)
+          </span>
+          <button onclick="exportToExcel('onetime')" style="padding:8px 16px;background:var(--green);color:var(--bg);border:none;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:6px" onmouseover="this.style.transform='translateY(-2px)';this.style.background='#6bc794'" onmouseout="this.style.transform='translateY(0)';this.style.background='var(--green)'">
+            📥 Export All 104
+          </span>
+          <span style="font-size:14px;color:var(--gold)">Opportunity to convert!</span>
+        </div>
+        
+        <div style="background:var(--card);border-radius:12px;padding:20px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:15px">
+            <div style="text-align:center">
+              <div style="font-size:28px;font-weight:700;color:var(--cream)">104</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">One-time orders</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:28px;font-weight:700;color:var(--orange)">₹40,560</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Total revenue</div>
+            </div>
+            <div style="text-align:center">
+              <div style="font-size:28px;font-weight:700;color:var(--gold)">₹390</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Avg order value</div>
+            </div>
+          </div>
+          
+          <div style="padding:15px;background:rgba(212,168,67,0.1);border-radius:8px;border:1px solid rgba(212,168,67,0.2)">
+            <div style="font-size:13px;color:var(--gold);font-weight:600;margin-bottom:5px">💡 Growth Opportunity</div>
+            <div style="font-size:13px;color:var(--cream);line-height:1.6">
+              104 customers ordered once but never returned. Send them: "We miss you! Here's 15% off your next order - code COMEBACK15"<br>
+              <span style="color:var(--muted);font-size:12px">If 20% return → +21 repeat customers → +₹18,000 monthly revenue</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- LOYALTY SUGGESTIONS -->
+      <div style="margin-top:25px;padding:20px;background:rgba(90,175,122,0.1);border-radius:12px;border:1px solid rgba(90,175,122,0.2)">
+        <div style="font-size:16px;color:var(--green);font-weight:600;margin-bottom:12px">💎 Recommended Actions</div>
+        <div style="font-size:13px;color:var(--cream);line-height:1.8">
+          • <b>VIP Tier (12 customers):</b> Send "VIP10" code - 10% off always<br>
+          • <b>Regular Tier (26 customers):</b> Send "Thanks for being a regular! Code REG5 for 5% off"<br>
+          • <b>One-timers (104):</b> Win-back campaign with COMEBACK15 (15% off)<br>
+          • <b>Target:</b> Convert 30 one-timers → +₹27,000/month revenue
+        </div>
+      </div>
+    </div>
+    
+    <!-- PAYMENT BREAKDOWN -->
+    <div class="section">
+      <div class="section-title">💳 Payment Methods (This Week)</div>
+      
+      <div style="display:flex;gap:20px;margin-top:20px">
+        <div style="flex:1;text-align:center;padding:30px;background:var(--card);border-radius:12px">
+          <div style="font-size:48px;font-weight:700;color:var(--gold)">65%</div>
+          <div style="font-size:14px;color:var(--muted);margin-top:8px">UPI Payments</div>
+          <div style="font-size:18px;color:var(--cream);margin-top:5px">₹12,000</div>
+        </div>
+        
+        <div style="flex:1;text-align:center;padding:30px;background:var(--card);border-radius:12px">
+          <div style="font-size:48px;font-weight:700;color:var(--orange)">35%</div>
+          <div style="font-size:14px;color:var(--muted);margin-top:8px">Cash Payments</div>
+          <div style="font-size:18px;color:var(--cream);margin-top:5px">₹6,450</div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+
+<script>
+// Sample customer data (in real system, this comes from Google Sheets API)
+const allCustomers = {
+  vip: [
+    {name:'Rahul Sharma', phone:'919812345678', orders:12, spent:4680, avgOrder:390, lastOrder:'2 days ago'},
+    {name:'Priya Singh', phone:'919876543210', orders:9, spent:3420, avgOrder:380, lastOrder:'1 day ago'},
+    {name:'Amit Kumar', phone:'919988776655', orders:7, spent:2890, avgOrder:413, lastOrder:'3 days ago'},
+    {name:'Neha Kapoor', phone:'919912388776', orders:6, spent:2340, avgOrder:390, lastOrder:'4 days ago'},
+    {name:'Vikas Gupta', phone:'919888765544', orders:5, spent:1950, avgOrder:390, lastOrder:'5 days ago'},
+    {name:'Anjali Rao', phone:'919765432109', orders:5, spent:1875, avgOrder:375, lastOrder:'6 days ago'},
+    {name:'Karan Malhotra', phone:'919654321098', orders:5, spent:1800, avgOrder:360, lastOrder:'1 week ago'},
+    {name:'Pooja Reddy', phone:'919543210987', orders:5, spent:1750, avgOrder:350, lastOrder:'1 week ago'},
+    {name:'Suresh Kumar', phone:'919432109876', orders:5, spent:1725, avgOrder:345, lastOrder:'1 week ago'},
+    {name:'Divya Mehta', phone:'919321098765', orders:5, spent:1700, avgOrder:340, lastOrder:'1 week ago'},
+    {name:'Rohan Desai', phone:'919210987654', orders:5, spent:1650, avgOrder:330, lastOrder:'1 week ago'},
+    {name:'Sneha Joshi', phone:'919109876543', orders:5, spent:1600, avgOrder:320, lastOrder:'2 weeks ago'}
+  ],
+  regular: [
+    {name:'Sanjay Kumar', phone:'919765433221', orders:4, spent:1560, avgOrder:390},
+    {name:'Ritu Verma', phone:'919877654433', orders:3, spent:1170, avgOrder:390},
+    {name:'Mohit Sharma', phone:'919966544332', orders:3, spent:1080, avgOrder:360},
+    {name:'Deepak Jain', phone:'919855433221', orders:2, spent:780, avgOrder:390},
+    {name:'Kavita Singh', phone:'919744322110', orders:4, spent:1520, avgOrder:380},
+    {name:'Rajesh Gupta', phone:'919633211009', orders:3, spent:1140, avgOrder:380},
+    {name:'Meera Patel', phone:'919522100998', orders:3, spent:1050, avgOrder:350},
+    {name:'Arjun Nair', phone:'919411099887', orders:2, spent:760, avgOrder:380},
+    {name:'Simran Kaur', phone:'919300988776', orders:4, spent:1480, avgOrder:370},
+    {name:'Vikram Sethi', phone:'919199877665', orders:3, spent:1110, avgOrder:370},
+    {name:'Anita Chopra', phone:'919088766554', orders:2, spent:740, avgOrder:370},
+    {name:'Manoj Yadav', phone:'918977655443', orders:4, spent:1440, avgOrder:360},
+    {name:'Nisha Agarwal', phone:'918866544332', orders:3, spent:1080, avgOrder:360},
+    {name:'Gaurav Bansal', phone:'918755433221', orders:2, spent:720, avgOrder:360},
+    {name:'Rekha Iyer', phone:'918644322110', orders:4, spent:1400, avgOrder:350},
+    {name:'Anil Sharma', phone:'918533211009', orders:3, spent:1050, avgOrder:350},
+    {name:'Preeti Mishra', phone:'918422100998', orders:2, spent:700, avgOrder:350},
+    {name:'Sunil Kapoor', phone:'918311099887', orders:4, spent:1360, avgOrder:340},
+    {name:'Geeta Reddy', phone:'918200988776', orders:3, spent:1020, avgOrder:340},
+    {name:'Harish Mehta', phone:'918199877665', orders:2, spent:680, avgOrder:340},
+    {name:'Lakshmi Nair', phone:'918088766554', orders:4, spent:1320, avgOrder:330},
+    {name:'Ramesh Verma', phone:'917977655443', orders:3, spent:990, avgOrder:330},
+    {name:'Usha Desai', phone:'917866544332', orders:2, spent:660, avgOrder:330},
+    {name:'Dinesh Joshi', phone:'917755433221', orders:4, spent:1280, avgOrder:320},
+    {name:'Sangeeta Roy', phone:'917644322110', orders:3, spent:960, avgOrder:320},
+    {name:'Prakash Kulkarni', phone:'917533211009', orders:2, spent:640, avgOrder:320}
+  ],
+  onetime: [] // Generate 104 one-time customers
+};
+
+// Generate 104 one-time customers
+for(let i=1; i<=104; i++) {
+  const names = ['Raj','Amit','Priya','Neha','Rahul','Pooja','Vikram','Simran','Karan','Anjali'];
+  const surnames = ['Kumar','Sharma','Singh','Patel','Gupta','Verma','Reddy','Nair','Joshi','Mehta'];
+  allCustomers.onetime.push({
+    name: names[i%10] + ' ' + surnames[Math.floor(i/10)%10],
+    phone: '91' + (9000000000 + i*1000 + Math.floor(Math.random()*1000)),
+    orderDate: Math.floor(Math.random()*30) + ' days ago',
+    spent: 300 + Math.floor(Math.random()*300)
+  });
+}
+
+function exportToExcel(type) {
+  let data = [];
+  let filename = '';
+  
+  if(type === 'vip') {
+    filename = 'VIP-Customers.xlsx';
+    data = [['Name', 'Phone Number', 'Total Orders', 'Total Spent', 'Avg Order', 'Last Order']];
+    allCustomers.vip.forEach(c => {
+      data.push([c.name, c.phone, c.orders, '₹'+c.spent, '₹'+c.avgOrder, c.lastOrder]);
+    });
+  } else if(type === 'regular') {
+    filename = 'Regular-Customers.xlsx';
+    data = [['Name', 'Phone Number', 'Total Orders', 'Total Spent', 'Avg Order']];
+    allCustomers.regular.forEach(c => {
+      data.push([c.name, c.phone, c.orders, '₹'+c.spent, '₹'+c.avgOrder]);
+    });
+  } else if(type === 'onetime') {
+    filename = 'One-Time-Customers.xlsx';
+    data = [['Name', 'Phone Number', 'Order Date', 'Amount Spent']];
+    allCustomers.onetime.forEach(c => {
+      data.push([c.name, c.phone, c.orderDate, '₹'+c.spent]);
+    });
+  }
+  
+  // Create workbook and download
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  
+  // Auto-size columns
+  ws['!cols'] = [{wch:20},{wch:15},{wch:12},{wch:12},{wch:12},{wch:15}];
+  
+  XLSX.utils.book_append_sheet(wb, ws, type.toUpperCase());
+  XLSX.writeFile(wb, filename);
+  
+  // Show success message
+  alert('✅ ' + filename + ' downloaded! Open it to see all customer details with phone numbers.');
+}
+
+function exportAllCustomers() {
+  const wb = XLSX.utils.book_new();
+  
+  // VIP Sheet
+  let vipData = [['Name', 'Phone Number', 'Total Orders', 'Total Spent', 'Avg Order', 'Last Order']];
+  allCustomers.vip.forEach(c => vipData.push([c.name, c.phone, c.orders, '₹'+c.spent, '₹'+c.avgOrder, c.lastOrder]));
+  const wsVIP = XLSX.utils.aoa_to_sheet(vipData);
+  wsVIP['!cols'] = [{wch:20},{wch:15},{wch:12},{wch:12},{wch:12},{wch:15}];
+  XLSX.utils.book_append_sheet(wb, wsVIP, "VIP");
+  
+  // Regular Sheet
+  let regData = [['Name', 'Phone Number', 'Total Orders', 'Total Spent', 'Avg Order']];
+  allCustomers.regular.forEach(c => regData.push([c.name, c.phone, c.orders, '₹'+c.spent, '₹'+c.avgOrder]));
+  const wsReg = XLSX.utils.aoa_to_sheet(regData);
+  wsReg['!cols'] = [{wch:20},{wch:15},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, wsReg, "Regular");
+  
+  // One-Time Sheet
+  let oneData = [['Name', 'Phone Number', 'Order Date', 'Amount Spent']];
+  allCustomers.onetime.forEach(c => oneData.push([c.name, c.phone, c.orderDate, '₹'+c.spent]));
+  const wsOne = XLSX.utils.aoa_to_sheet(oneData);
+  wsOne['!cols'] = [{wch:20},{wch:15},{wch:15},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, wsOne, "One-Time");
+  
+  XLSX.writeFile(wb, 'All-Customers-MyHotel.xlsx');
+  alert('✅ All-Customers-MyHotel.xlsx downloaded! Contains 3 sheets: VIP, Regular, and One-Time customers.');
+}
+</script>
+
+</body>
+</html>
