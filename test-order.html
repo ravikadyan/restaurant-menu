@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test Google Sheets Connection</title>
+<style>
+body { font-family: Arial; padding: 40px; max-width: 600px; margin: 0 auto; }
+button { padding: 12px 24px; background: #1A1A1A; color: white; border: none; border-radius: 8px; cursor: pointer; }
+pre { background: #f5f5f5; padding: 15px; border-radius: 8px; overflow-x: auto; }
+</style>
+</head>
+<body>
+  <h1>Test Google Sheets Connection</h1>
+  <p>Click the button below to test if orders can be sent to Google Sheets:</p>
+  
+  <button onclick="testOrder()">Send Test Order</button>
+  
+  <h3>Result:</h3>
+  <pre id="result">Waiting for test...</pre>
+  
+  <script>
+    const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvdzxHosTC3RfiwHlElvTaO3R-XX1oyrxHYrNzRCtlBLAVQfiWG58PyirkICRa3wCoxg/exec';
+    
+    async function testOrder() {
+      const result = document.getElementById('result');
+      result.textContent = 'Sending test order...';
+      
+      const testData = {
+        orderId: 'TEST' + Date.now(),
+        name: 'Test Customer',
+        phone: '9999999999',
+        table: '5',
+        items: 'Test Item x1',
+        total: '100',
+        time: new Date().toLocaleString('en-IN'),
+        status: 'pending',
+        eta: '',
+        payment: 'cash'
+      };
+      
+      try {
+        console.log('Sending data:', testData);
+        
+        const response = await fetch(SHEET_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(testData)
+        });
+        
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          data = await response.text();
+        }
+        
+        console.log('Response data:', data);
+        
+        result.textContent = `✅ SUCCESS!\n\nStatus: ${response.status}\nResponse: ${JSON.stringify(data, null, 2)}`;
+        
+      } catch (error) {
+        console.error('Full error:', error);
+        result.textContent = `❌ ERROR!\n\nError Type: ${error.name}\nError Message: ${error.message}\n\nThis usually means:\n1. Google Apps Script URL is wrong\n2. Script not deployed correctly\n3. Script deployed with wrong permissions\n\nCheck your deployment settings!`;
+      }
+    }
+  </script>
+</body>
+</html>
