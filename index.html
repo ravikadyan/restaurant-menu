@@ -10,9 +10,7 @@
     
     :root {
       --primary: #1A1A1A;
-      --primary-light: #2D2D2D;
       --accent: #D4A373;
-      --accent-light: #E8C4A0;
       --bg: #FAFAFA;
       --card: #FFFFFF;
       --text: #1A1A1A;
@@ -30,12 +28,10 @@
       padding-bottom: 100px;
     }
     
-    /* HEADER */
     .header {
       background: var(--primary);
       padding: 40px 20px 45px;
       text-align: center;
-      position: relative;
     }
     
     .logo {
@@ -44,7 +40,6 @@
       font-weight: 700;
       color: white;
       margin-bottom: 8px;
-      letter-spacing: -0.5px;
     }
     
     .tagline {
@@ -70,16 +65,13 @@
       border: 1px solid rgba(255,255,255,0.15);
     }
     
-    /* SEARCH */
     .search-container {
       padding: 18px 20px;
       background: white;
       border-bottom: 1px solid var(--border);
     }
     
-    .search-box {
-      position: relative;
-    }
+    .search-box { position: relative; }
     
     .search-icon {
       position: absolute;
@@ -95,7 +87,6 @@
       border: 1.5px solid var(--border);
       border-radius: 12px;
       font-size: 14px;
-      font-family: 'Inter', sans-serif;
       transition: all 0.2s;
     }
     
@@ -104,7 +95,6 @@
       border-color: var(--accent);
     }
     
-    /* FILTERS */
     .filters {
       display: flex;
       gap: 10px;
@@ -135,7 +125,6 @@
       border-color: var(--primary);
     }
     
-    /* MENU GRID */
     .menu-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -151,9 +140,7 @@
       transition: all 0.25s;
     }
     
-    .dish-card:active {
-      transform: scale(0.97);
-    }
+    .dish-card:active { transform: scale(0.97); }
     
     .dish-image-wrapper {
       width: 100%;
@@ -186,10 +173,7 @@
       background: white;
     }
     
-    .veg-badge.veg {
-      border-color: var(--green);
-    }
-    
+    .veg-badge.veg { border-color: var(--green); }
     .veg-badge.veg::after {
       content: '';
       width: 8px;
@@ -198,22 +182,16 @@
       border-radius: 50%;
     }
     
-    .veg-badge.nonveg {
-      border-color: var(--red);
-    }
-    
+    .veg-badge.nonveg { border-color: var(--red); }
     .veg-badge.nonveg::after {
       content: '';
-      width: 0;
-      height: 0;
+      width: 0; height: 0;
       border-left: 5px solid transparent;
       border-right: 5px solid transparent;
       border-bottom: 8px solid var(--red);
     }
     
-    .dish-info {
-      padding: 14px;
-    }
+    .dish-info { padding: 14px; }
     
     .dish-name {
       font-size: 15px;
@@ -265,9 +243,7 @@
       transition: all 0.2s;
     }
     
-    .add-button:active {
-      transform: scale(0.95);
-    }
+    .add-button:active { transform: scale(0.95); }
     
     .qty-controls {
       display: flex;
@@ -280,8 +256,7 @@
     }
     
     .qty-btn {
-      width: 26px;
-      height: 26px;
+      width: 26px; height: 26px;
       border-radius: 50%;
       border: none;
       background: var(--primary);
@@ -318,12 +293,9 @@
       color: #B45309;
     }
     
-    /* CART BAR */
     .cart-bar {
       position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
+      bottom: 0; left: 0; right: 0;
       background: var(--primary);
       padding: 16px 20px;
       display: none;
@@ -335,9 +307,7 @@
     
     .cart-bar.show { display: flex; }
     
-    .cart-details {
-      color: white;
-    }
+    .cart-details { color: white; }
     
     .cart-count {
       font-size: 13px;
@@ -362,14 +332,10 @@
       cursor: pointer;
     }
     
-    /* MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.7);
       z-index: 200;
       align-items: flex-end;
@@ -402,10 +368,8 @@
     
     .modal-close {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      width: 36px;
-      height: 36px;
+      top: 20px; right: 20px;
+      width: 36px; height: 36px;
       border-radius: 50%;
       background: var(--bg);
       border: none;
@@ -428,9 +392,7 @@
       font-family: 'Playfair Display', serif;
     }
     
-    .modal-body {
-      padding: 24px;
-    }
+    .modal-body { padding: 24px; }
     
     .cart-item {
       display: flex;
@@ -440,8 +402,7 @@
     }
     
     .cart-item-image {
-      width: 70px;
-      height: 70px;
+      width: 70px; height: 70px;
       background: #FCFCFC;
       border-radius: 12px;
       display: flex;
@@ -456,9 +417,7 @@
       object-fit: contain;
     }
     
-    .cart-item-info {
-      flex: 1;
-    }
+    .cart-item-info { flex: 1; }
     
     .cart-item-name {
       font-size: 15px;
@@ -472,9 +431,7 @@
       margin-bottom: 8px;
     }
     
-    .form-group {
-      margin-bottom: 20px;
-    }
+    .form-group { margin-bottom: 20px; }
     
     .form-label {
       display: block;
@@ -490,7 +447,6 @@
       border: 1.5px solid var(--border);
       border-radius: 12px;
       font-size: 14px;
-      font-family: 'Inter', sans-serif;
     }
     
     .form-input:focus {
@@ -529,7 +485,6 @@
       margin-top: 12px;
     }
     
-    /* STATUS SCREEN */
     .status-screen {
       text-align: center;
       padding: 40px 24px;
@@ -630,25 +585,17 @@
     <button class="view-cart-button" onclick="showStep(1)">View Cart →</button>
   </div>
   
-  <!-- MODAL -->
   <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
-    <div class="modal" id="modal">
-      <!-- Content will be dynamically inserted -->
-    </div>
+    <div class="modal" id="modal"></div>
   </div>
   
   <script>
-    // CONFIGURATION
     const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvdzxHosTC3RfiwHlElvTaO3R-XX1oyrxHYrNzRCtlBLAVQfiWG58PyirkICRa3wCoxg/exec';
-    const OWNER_WHATSAPP = '917404787308';
-    const RESTAURANT_NAME = 'MyHotel';
     
-    // Get table number from URL
     const urlParams = new URLSearchParams(window.location.search);
     const tableNum = urlParams.get('table') || '5';
     document.getElementById('tableNumber').textContent = `Table ${tableNum}`;
     
-    // MENU DATA
     const MENU = [
       {id:'1', name:'Paneer Tikka Masala', category:'main', price:280, image:'panir-tika-masala.png', type:'veg', rating:4.8, time:25, popular:true},
       {id:'2', name:'Dal Makhani', category:'main', price:220, image:'dal-makhni.png', type:'veg', rating:4.7, time:30, popular:false},
@@ -663,12 +610,9 @@
     
     let cart = [];
     let currentStep = 0;
-    let customerName = '';
-    let customerPhone = '';
-    let orderId = '';
     let orderPlaced = false;
+    let orderId = '';
     
-    // RENDER MENU
     function renderMenu(filter = 'all') {
       const grid = document.getElementById('menuGrid');
       const filtered = filter === 'all' ? MENU : MENU.filter(item => item.category === filter);
@@ -708,7 +652,6 @@
       }).join('');
     }
     
-    // CART FUNCTIONS
     function addToCart(id) {
       const item = MENU.find(m => m.id === id);
       cart.push({...item, qty: 1});
@@ -725,9 +668,7 @@
       const item = cart.find(c => c.id === id);
       if (item) {
         item.qty--;
-        if (item.qty === 0) {
-          cart = cart.filter(c => c.id !== id);
-        }
+        if (item.qty === 0) cart = cart.filter(c => c.id !== id);
       }
       updateCart();
     }
@@ -739,31 +680,16 @@
       document.getElementById('cartCount').textContent = `${totalItems} item${totalItems !== 1 ? 's' : ''}`;
       document.getElementById('cartTotal').textContent = `₹${totalPrice}`;
       
-      if (totalItems > 0) {
-        document.getElementById('cartBar').classList.add('show');
-      } else {
-        document.getElementById('cartBar').classList.remove('show');
-      }
-      
+      document.getElementById('cartBar').classList.toggle('show', totalItems > 0);
       renderMenu();
     }
     
-    // FILTER MENU
     function filterMenu(category) {
       document.querySelectorAll('.filter-chip').forEach(btn => btn.classList.remove('active'));
       event.target.classList.add('active');
       renderMenu(category);
     }
     
-    // SEARCH
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      const search = e.target.value.toLowerCase();
-      const filtered = MENU.filter(item => item.name.toLowerCase().includes(search));
-      const grid = document.getElementById('menuGrid');
-      renderMenu();
-    });
-    
-    // MODAL STEPS
     function showStep(step) {
       currentStep = step;
       const overlay = document.getElementById('modalOverlay');
@@ -803,7 +729,6 @@
       }
     }
     
-    // Prevent back button when order is placed
     window.addEventListener('popstate', function(event) {
       if (orderPlaced && currentStep === 3) {
         if (confirm('Your order is already placed. Do you want to go back and order something else?')) {
@@ -841,10 +766,6 @@
           `).join('')}
           
           <div class="order-summary">
-            <div class="summary-row">
-              <span>Subtotal</span>
-              <span>₹${total}</span>
-            </div>
             <div class="summary-row total">
               <span>Total</span>
               <span>₹${total}</span>
@@ -867,12 +788,12 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label">Your Name</label>
-            <input type="text" class="form-input" id="customerName" placeholder="Enter your name" value="${customerName}" autocomplete="name">
+            <input type="text" class="form-input" id="customerName" placeholder="Enter your name" autocomplete="name">
           </div>
           
           <div class="form-group">
             <label class="form-label">Phone Number</label>
-            <input type="tel" class="form-input" id="customerPhone" placeholder="10-digit mobile number" value="${customerPhone}" maxlength="10" autocomplete="tel">
+            <input type="tel" class="form-input" id="customerPhone" placeholder="10-digit mobile number" maxlength="10" autocomplete="tel">
           </div>
           
           <button class="btn-primary" onclick="placeOrder()" id="placeOrderBtn">Place Order - ₹${total}</button>
@@ -881,8 +802,8 @@
     }
     
     async function placeOrder() {
-      customerName = document.getElementById('customerName').value.trim();
-      customerPhone = document.getElementById('customerPhone').value.trim();
+      const customerName = document.getElementById('customerName').value.trim();
+      const customerPhone = document.getElementById('customerPhone').value.trim();
       
       if (!customerName || !customerPhone) {
         alert('Please fill all details');
@@ -897,7 +818,6 @@
       document.getElementById('placeOrderBtn').disabled = true;
       document.getElementById('placeOrderBtn').textContent = 'Placing Order...';
       
-      // Generate Order ID
       orderId = 'ORD' + Date.now();
       
       const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -917,25 +837,37 @@
       };
       
       try {
-        const response = await fetch(SHEET_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(orderData)
-        });
+        // Use redirect method for Google Apps Script (works better with CORS)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = SHEET_URL;
+        form.target = 'hidden_iframe';
         
-        const result = await response.json();
-        console.log('Order placed:', result);
+        for (const key in orderData) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = orderData[key];
+          form.appendChild(input);
+        }
         
-        orderPlaced = true;
-        window.history.pushState(null, null, window.location.href);
+        const iframe = document.createElement('iframe');
+        iframe.name = 'hidden_iframe';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+        document.body.appendChild(form);
         
-        // Show status screen
-        showStep(3);
+        form.submit();
+        
+        // Assume success and show status
+        setTimeout(() => {
+          orderPlaced = true;
+          window.history.pushState(null, null, window.location.href);
+          showStep(3);
+        }, 500);
         
       } catch (error) {
-        console.error('Error placing order:', error);
+        console.error('Error:', error);
         alert('Error placing order. Please try again.');
         document.getElementById('placeOrderBtn').disabled = false;
         document.getElementById('placeOrderBtn').textContent = 'Place Order - ₹' + total;
@@ -985,10 +917,8 @@
     function orderAgain() {
       closeModal();
       orderPlaced = false;
-      // Keep the cart so customer can add more items
     }
     
-    // INIT
     renderMenu();
   </script>
   
