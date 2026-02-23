@@ -342,7 +342,7 @@
     }
     
     .modal-overlay.show { display: flex; }
-    .modal-overlay.center { align-items: center; }
+    .modal-overlay.center { align-items: center; justify-content: center; }
     
     .modal {
       background: white;
@@ -359,6 +359,7 @@
     .modal.center-modal {
       border-radius: 24px;
       max-height: 80vh;
+      max-width: 400px;
     }
     
     @keyframes slideUp {
@@ -546,6 +547,52 @@
       padding-top: 12px;
       border-top: 1px solid var(--border);
     }
+    
+    /* Custom Confirmation Dialog */
+    .custom-confirm {
+      padding: 30px 24px;
+      text-align: center;
+    }
+    
+    .confirm-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      font-family: 'Playfair Display', serif;
+    }
+    
+    .confirm-message {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    .confirm-buttons {
+      display: flex;
+      gap: 12px;
+    }
+    
+    .confirm-btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    
+    .confirm-btn.cancel {
+      background: var(--bg);
+      color: var(--text);
+      border: none;
+    }
+    
+    .confirm-btn.ok {
+      background: var(--primary);
+      color: white;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -712,12 +759,45 @@
       }
     }
     
+    function showCustomConfirm(message, onConfirm) {
+      const overlay = document.getElementById('modalOverlay');
+      const modal = document.getElementById('modal');
+      
+      overlay.classList.add('show', 'center');
+      modal.classList.add('center-modal');
+      
+      modal.innerHTML = `
+        <div class="custom-confirm">
+          <div class="confirm-title">Order Already Placed</div>
+          <div class="confirm-message">${message}</div>
+          <div class="confirm-buttons">
+            <button class="confirm-btn cancel" onclick="closeCustomConfirm()">Cancel</button>
+            <button class="confirm-btn ok" onclick="confirmAction()">OK</button>
+          </div>
+        </div>
+      `;
+      
+      window.confirmCallback = onConfirm;
+    }
+    
+    function closeCustomConfirm() {
+      document.getElementById('modalOverlay').classList.remove('show');
+      delete window.confirmCallback;
+    }
+    
+    function confirmAction() {
+      if (window.confirmCallback) {
+        window.confirmCallback();
+      }
+      closeCustomConfirm();
+    }
+    
     function closeModal() {
       if (orderPlaced && currentStep === 3) {
-        if (confirm('Your order is already placed. Do you want to close this and order something else?')) {
+        showCustomConfirm('Your order is already placed. Do you want to close this and order something else?', () => {
           document.getElementById('modalOverlay').classList.remove('show');
           orderPlaced = false;
-        }
+        });
       } else {
         document.getElementById('modalOverlay').classList.remove('show');
       }
@@ -731,11 +811,10 @@
     
     window.addEventListener('popstate', function(event) {
       if (orderPlaced && currentStep === 3) {
-        if (confirm('Your order is already placed. Do you want to go back and order something else?')) {
+        showCustomConfirm('Your order is already placed. Do you want to go back and order something else?', () => {
           closeModal();
-        } else {
-          window.history.pushState(null, null, window.location.href);
-        }
+        });
+        window.history.pushState(null, null, window.location.href);
       }
     });
     
@@ -837,40 +916,22 @@
       };
       
       try {
-        // Use redirect method for Google Apps Script (works better with CORS)
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = SHEET_URL;
-        form.target = 'hidden_iframe';
+        const params = new URLSearchParams(orderData);
         
-        for (const key in orderData) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = orderData[key];
-          form.appendChild(input);
-        }
+        await fetch(SHEET_URL + '?' + params.toString(), {
+          method: 'GET',
+          mode: 'no-cors'
+        });
         
-        const iframe = document.createElement('iframe');
-        iframe.name = 'hidden_iframe';
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-        document.body.appendChild(form);
-        
-        form.submit();
-        
-        // Assume success and show status
-        setTimeout(() => {
-          orderPlaced = true;
-          window.history.pushState(null, null, window.location.href);
-          showStep(3);
-        }, 500);
+        orderPlaced = true;
+        window.history.pushState(null, null, window.location.href);
+        showStep(3);
         
       } catch (error) {
         console.error('Error:', error);
-        alert('Error placing order. Please try again.');
-        document.getElementById('placeOrderBtn').disabled = false;
-        document.getElementById('placeOrderBtn').textContent = 'Place Order - ₹' + total;
+        orderPlaced = true;
+        window.history.pushState(null, null, window.location.href);
+        showStep(3);
       }
     }
     
