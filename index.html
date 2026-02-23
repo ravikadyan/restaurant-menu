@@ -387,6 +387,7 @@
       max-height: 90vh;
       overflow-y: auto;
       animation: slideUp 0.3s;
+      position: relative;
     }
     
     .modal.center-modal {
@@ -397,6 +398,23 @@
     @keyframes slideUp {
       from { transform: translateY(100%); }
       to { transform: translateY(0); }
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
     }
     
     .modal-header {
@@ -480,42 +498,6 @@
       border-color: var(--accent);
     }
     
-    .payment-options {
-      display: grid;
-      gap: 12px;
-    }
-    
-    .payment-option {
-      padding: 16px;
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .payment-option.selected {
-      border-color: var(--primary);
-      background: rgba(26,26,26,0.03);
-    }
-    
-    .payment-icon {
-      font-size: 24px;
-    }
-    
-    .payment-info h4 {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    
-    .payment-info p {
-      font-size: 12px;
-      color: var(--text-light);
-    }
-    
     .btn-primary {
       width: 100%;
       padding: 16px;
@@ -532,6 +514,19 @@
     .btn-primary:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      width: 100%;
+      padding: 16px;
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 12px;
     }
     
     /* STATUS SCREEN */
@@ -636,7 +631,7 @@
   </div>
   
   <!-- MODAL -->
-  <div class="modal-overlay" id="modalOverlay">
+  <div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
     <div class="modal" id="modal">
       <!-- Content will be dynamically inserted -->
     </div>
@@ -646,7 +641,6 @@
     // CONFIGURATION
     const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwvdzxHosTC3RfiwHlElvTaO3R-XX1oyrxHYrNzRCtlBLAVQfiWG58PyirkICRa3wCoxg/exec';
     const OWNER_WHATSAPP = '917404787308';
-    const UPI_ID = '8130560938@ybl';
     const RESTAURANT_NAME = 'MyHotel';
     
     // Get table number from URL
@@ -671,8 +665,8 @@
     let currentStep = 0;
     let customerName = '';
     let customerPhone = '';
-    let paymentMethod = '';
     let orderId = '';
+    let orderPlaced = false;
     
     // RENDER MENU
     function renderMenu(filter = 'all') {
@@ -686,7 +680,7 @@
         return `
           <div class="dish-card">
             <div class="dish-image-wrapper">
-              <div class="veg-badge ${item.type}""></div>
+              <div class="veg-badge ${item.type}"></div>
               <img src="${item.image}" alt="${item.name}" class="dish-image">
             </div>
             <div class="dish-info">
@@ -766,7 +760,6 @@
       const search = e.target.value.toLowerCase();
       const filtered = MENU.filter(item => item.name.toLowerCase().includes(search));
       const grid = document.getElementById('menuGrid');
-      // Re-render with filtered results (simplified)
       renderMenu();
     });
     
@@ -779,17 +772,14 @@
       overlay.classList.add('show');
       
       if (step === 1) {
-        // Cart Review
         overlay.classList.remove('center');
         modal.classList.remove('center-modal');
         showCartReview();
       } else if (step === 2) {
-        // Customer Details
         overlay.classList.remove('center');
         modal.classList.remove('center-modal');
         showCustomerDetails();
       } else if (step === 3) {
-        // Order Status
         overlay.classList.add('center');
         modal.classList.add('center-modal');
         showOrderStatus();
@@ -797,13 +787,38 @@
     }
     
     function closeModal() {
-      document.getElementById('modalOverlay').classList.remove('show');
+      if (orderPlaced && currentStep === 3) {
+        if (confirm('Your order is already placed. Do you want to close this and order something else?')) {
+          document.getElementById('modalOverlay').classList.remove('show');
+          orderPlaced = false;
+        }
+      } else {
+        document.getElementById('modalOverlay').classList.remove('show');
+      }
     }
+    
+    function handleOverlayClick(event) {
+      if (event.target === document.getElementById('modalOverlay')) {
+        closeModal();
+      }
+    }
+    
+    // Prevent back button when order is placed
+    window.addEventListener('popstate', function(event) {
+      if (orderPlaced && currentStep === 3) {
+        if (confirm('Your order is already placed. Do you want to go back and order something else?')) {
+          closeModal();
+        } else {
+          window.history.pushState(null, null, window.location.href);
+        }
+      }
+    });
     
     function showCartReview() {
       const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       
       document.getElementById('modal').innerHTML = `
+        <button class="modal-close" onclick="closeModal()">✕</button>
         <div class="modal-header">
           <div class="modal-title">Your Order</div>
         </div>
@@ -836,7 +851,7 @@
             </div>
           </div>
           
-          <button class="btn-primary" onclick="showStep(2)">Continue to Details →</button>
+          <button class="btn-primary" onclick="showStep(2)">Continue →</button>
         </div>
       `;
     }
@@ -845,38 +860,19 @@
       const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       
       document.getElementById('modal').innerHTML = `
+        <button class="modal-close" onclick="closeModal()">✕</button>
         <div class="modal-header">
           <div class="modal-title">Your Details</div>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label">Your Name</label>
-            <input type="text" class="form-input" id="customerName" placeholder="Enter your name" value="${customerName}">
+            <input type="text" class="form-input" id="customerName" placeholder="Enter your name" value="${customerName}" autocomplete="name">
           </div>
           
           <div class="form-group">
             <label class="form-label">Phone Number</label>
-            <input type="tel" class="form-input" id="customerPhone" placeholder="10-digit mobile number" value="${customerPhone}" maxlength="10">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Payment Method</label>
-            <div class="payment-options">
-              <div class="payment-option ${paymentMethod === 'upi' ? 'selected' : ''}" onclick="selectPayment('upi')">
-                <div class="payment-icon">💳</div>
-                <div class="payment-info">
-                  <h4>UPI / Online</h4>
-                  <p>Pay via Google Pay, PhonePe, Paytm</p>
-                </div>
-              </div>
-              <div class="payment-option ${paymentMethod === 'cash' ? 'selected' : ''}" onclick="selectPayment('cash')">
-                <div class="payment-icon">💵</div>
-                <div class="payment-info">
-                  <h4>Cash on Delivery</h4>
-                  <p>Pay when food is served</p>
-                </div>
-              </div>
-            </div>
+            <input type="tel" class="form-input" id="customerPhone" placeholder="10-digit mobile number" value="${customerPhone}" maxlength="10" autocomplete="tel">
           </div>
           
           <button class="btn-primary" onclick="placeOrder()" id="placeOrderBtn">Place Order - ₹${total}</button>
@@ -884,22 +880,16 @@
       `;
     }
     
-    function selectPayment(method) {
-      paymentMethod = method;
-      document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-      event.currentTarget.classList.add('selected');
-    }
-    
     async function placeOrder() {
       customerName = document.getElementById('customerName').value.trim();
       customerPhone = document.getElementById('customerPhone').value.trim();
       
-      if (!customerName || !customerPhone || !paymentMethod) {
+      if (!customerName || !customerPhone) {
         alert('Please fill all details');
         return;
       }
       
-      if (customerPhone.length !== 10) {
+      if (customerPhone.length !== 10 || !/^\d+$/.test(customerPhone)) {
         alert('Please enter valid 10-digit phone number');
         return;
       }
@@ -923,26 +913,32 @@
         time: new Date().toLocaleString('en-IN'),
         status: 'pending',
         eta: '',
-        payment: paymentMethod
+        payment: 'cash'
       };
       
       try {
         const response = await fetch(SHEET_URL, {
           method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
           body: JSON.stringify(orderData)
         });
+        
+        const result = await response.json();
+        console.log('Order placed:', result);
+        
+        orderPlaced = true;
+        window.history.pushState(null, null, window.location.href);
         
         // Show status screen
         showStep(3);
         
-        // Send WhatsApp notification
-        const whatsappMsg = `🔔 New Order!%0A%0AOrder: ${orderId}%0ATable: ${tableNum}%0ACustomer: ${customerName}%0APhone: ${customerPhone}%0A%0AItems:%0A${items}%0A%0ATotal: ₹${total}%0APayment: ${paymentMethod.toUpperCase()}`;
-        window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${whatsappMsg}`, '_blank');
-        
       } catch (error) {
+        console.error('Error placing order:', error);
         alert('Error placing order. Please try again.');
         document.getElementById('placeOrderBtn').disabled = false;
-        document.getElementById('placeOrderBtn').textContent = 'Place Order';
+        document.getElementById('placeOrderBtn').textContent = 'Place Order - ₹' + total;
       }
     }
     
@@ -950,6 +946,7 @@
       const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
       
       document.getElementById('modal').innerHTML = `
+        <button class="modal-close" onclick="closeModal()">✕</button>
         <div class="status-screen">
           <div class="status-icon">✅</div>
           <div class="status-title">Order Placed!</div>
@@ -967,7 +964,7 @@
             </div>
             <div class="summary-row">
               <span>Payment</span>
-              <span>${paymentMethod.toUpperCase()}</span>
+              <span>Cash on Delivery</span>
             </div>
             <div class="summary-row total">
               <span>Total</span>
@@ -975,12 +972,20 @@
             </div>
           </div>
           
-          <p style="font-size:13px;color:var(--text-light);margin-top:20px;">
+          <p style="font-size:13px;color:var(--text-light);margin-top:20px;margin-bottom:20px;">
             Your food will be ready in 20-30 minutes<br>
-            We'll notify you when it's ready!
+            The waiter will notify you when it's ready!
           </p>
+          
+          <button class="btn-secondary" onclick="orderAgain()">🛒 Order Something Else</button>
         </div>
       `;
+    }
+    
+    function orderAgain() {
+      closeModal();
+      orderPlaced = false;
+      // Keep the cart so customer can add more items
     }
     
     // INIT
